@@ -7,8 +7,10 @@
  const click = async() => {
 
 const device = await navigator.bluetooth.requestDevice({
-  filters: [{ services: ["72c90001-57a9-4d40-b746-534e22ec9f9e"] }],
+  // filters: [{ services: ["72c90001-57a9-4d40-b746-534e22ec9f9e"] }],
+  acceptAllDevices: true,
 });
+
 console.log("connected" + device.name);
 const gattServer = await device.gatt?.connect();
 console.log("gatt server");
