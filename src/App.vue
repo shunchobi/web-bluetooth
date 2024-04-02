@@ -1,27 +1,51 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from "./components/HelloWorld.vue";
-import Text from "./components/text.vue";
-import Test2 from "./components/test2.vue";
-</script>
-
 <template>
-  <HelloWorld />
-  <!-- <Text /> -->
-  <!-- <Test2 /> -->
+  <!-- <p style="font-size: large">
+    {{
+      name != undefined
+        ? `デバイス名：${name}`
+        : "接続したデバイスの名前が見つかりませんでした"
+    }}
+  </p> -->
+  <button v-on:click="startDeviceScanner">デバイスを探す</button>
 </template>
 
+<script setup lang="ts">
+import { computed, ref } from "vue";
+
+const device = ref<BluetoothDevice>();
+
+const name = computed(() => {
+  return device.value?.name;
+});
+const startDeviceScanner = async () => {
+  // https://github.com/circuitpython/web-editor/issues/40
+  // const devices = await navigator.bluetooth.getDevices();
+  // console.log(devices);
+
+  device.value = await navigator.bluetooth.requestDevice({
+    acceptAllDevices: true,
+  });
+
+  // const gattServer = await device.gatt?.connect();
+
+  // console.log("gatt server: ", gattServer);
+
+  // const services = await gattServer?.getPrimaryServices();
+  // console.log(services);
+
+  // if (services == undefined || services?.length == 0) {
+  //   return;
+  // }
+
+  // const service = services[0];
+  // const tmpcha = await service.getCharacteristics(
+  //   "72c90003-57a9-4d40-b746-534e22ec9f9e"
+  // );
+  // console.log("tmpchar");
+  // console.log(tmpcha);
+};
+// tmpcha[0].addEventListener('characteristicvaluechanged')
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
 </style>
