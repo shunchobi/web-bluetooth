@@ -1,51 +1,92 @@
 <template>
-  <!-- <p style="font-size: large">
-    {{
-      name != undefined
-        ? `デバイス名：${name}`
-        : "接続したデバイスの名前が見つかりませんでした"
-    }}
-  </p> -->
-  <button v-on:click="startDeviceScanner">デバイスを探す</button>
+  <div v-if="errorMessage">
+    <span style="color: red">{{ errorMessage }}</span
+    ><br />
+  </div>
+  <div v-if="!isAvailability">
+    <span>web bluetoothを使用できない環境です</span><br />
+    <span>デバイスまたはブラウザを変更してください</span>
+  </div>
+
+  <div>
+    <span v-if="devices.length > 0" style="text-decoration: underline"
+      >接続済みデバイス名</span
+    >
+    <template v-for="(device, i) in devices" :key="i">
+      <p>・{{ device.name }}</p>
+    </template>
+  </div>
+
+  <div>
+    <button v-on:click="startDeviceScanner">デバイスを探す</button>
+    <!-- <button v-on:click="displayConnectedDevices">確認</button> -->
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+// import "./style.css";
 
-const device = ref<BluetoothDevice>();
+const isAvailability = ref(true);
+const errorMessage = ref();
 
-const name = computed(() => {
-  return device.value?.name;
-});
+const devices = ref<BluetoothDevice[]>([]);
+
+const displayConnectedDevices = () => {
+  // nearbyDevices.forEach((device) => {
+  //   device.addEventListener("advertisementreceived", (event) => {
+  //     const device = event.device;
+  //     const rssi = event.rssi;
+  //     console.log("rssi", rssi);
+  //   });
+  // });
+};
+
 const startDeviceScanner = async () => {
+  errorMessage.value = undefined;
+  isAvailability.value = await navigator.bluetooth.getAvailability();
+  if (!isAvailability.value) return;
+
+  /**
+    参考資料
+    https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-rssi
+  
+  */
+
   // https://github.com/circuitpython/web-editor/issues/40
+  // 接続したデバイスを取得
+  // 実装するならChromeの設定を変更する必要あり
+  // https://developer.mozilla.org/ja/docs/Web/API/Bluetooth/getDevices#%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%83%BC%E3%81%AE%E4%BA%92%E6%8F%9B%E6%80%A7
   // const devices = await navigator.bluetooth.getDevices();
   // console.log(devices);
 
-  device.value = await navigator.bluetooth.requestDevice({
-    acceptAllDevices: true,
-  });
-
-  // const gattServer = await device.gatt?.connect();
-
-  // console.log("gatt server: ", gattServer);
-
-  // const services = await gattServer?.getPrimaryServices();
-  // console.log(services);
-
-  // if (services == undefined || services?.length == 0) {
-  //   return;
-  // }
-
-  // const service = services[0];
-  // const tmpcha = await service.getCharacteristics(
-  //   "72c90003-57a9-4d40-b746-534e22ec9f9e"
-  // );
-  // console.log("tmpchar");
-  // console.log(tmpcha);
+  navigator.bluetooth
+    .requestDevice({
+      acceptAllDevices: true,
+    })
+    .then((device) => {
+      devices.value.push(device);
+    })
+    .catch((error: Error) => {
+      errorMessage.value = error.message;
+    })
+    .finally(() => {});
 };
-// tmpcha[0].addEventListener('characteristicvaluechanged')
 </script>
 
-<style scoped>
+<style>
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
 </style>
