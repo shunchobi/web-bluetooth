@@ -59,44 +59,16 @@ const startDeviceScanner = async () => {
   // };
 
   // Bluetoothデバイスをリクエストする
-  // const device = await navigator.bluetooth.requestDevice({
-  //   acceptAllDevices: true,
-  // });
-  // device.addEventListener(
-  //   "advertisementreceived",
-  //   (e: BluetoothAdvertisingEvent) => {
-  //     console.log("advertisementreceived: ", e);
-  //   }
-  // );
-  // BluetoothデバイスのサービスとキャラクタリスティックのUUIDを取得する
-  navigator.bluetooth
-    .requestDevice({ acceptAllDevices: true })
-    .then((device) => {
-      // デバイスが見つかった場合の処理
-      return device.gatt?.connect(); // デバイスに接続する
-    })
-    .then((server) => {
-      // GATTサーバーに接続した場合の処理
-      return server?.getPrimaryServices(); // デバイスのプライマリーサービスを取得する
-    })
-    .then((services) => {
-      // プライマリーサービスが取得された場合の処理
-      services?.forEach((service) => {
-        console.log("サービスのUUID:", service.uuid); // サービスのUUIDをログに表示する
-        service.getCharacteristics().then((characteristics) => {
-          // サービスのキャラクタリスティックを取得する
-          characteristics.forEach((characteristic) => {
-            console.log("キャラクタリスティックのUUID:", characteristic.uuid); // キャラクタリスティックのUUIDをログに表示する
-          });
-        });
-      });
-    })
-    .catch((error) => {
-      // エラーハンドリング
-      console.error("エラーが発生しました:", error);
-    });
-
-  // devices.value.push(device);
+  const device = await navigator.bluetooth.requestDevice({
+    acceptAllDevices: true,
+  });
+  device.addEventListener(
+    "advertisementreceived",
+    (e: BluetoothAdvertisingEvent) => {
+      console.log("advertisementreceived", e);
+    }
+  );
+  devices.value.push(device);
   // name.value = device.name ?? ''
   // const service = await device.gatt?.connect()
   // const preServices = await service?.getPrimaryService('00000d00-0000-1000-8000-00805f9b34fb') //0000181A-0000-1000-8000-00805F9B34FB
