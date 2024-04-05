@@ -1,5 +1,5 @@
 <template>
-  <div v-if="errorMessage">
+  <!-- <div v-if="errorMessage">
     <span style="color: red">{{ errorMessage }}</span
     ><br />
   </div>
@@ -15,7 +15,7 @@
     <template v-for="(device, i) in devices" :key="i">
       <p>・{{ device.name }}</p>
     </template>
-  </div>
+  </div> -->
 
   <div>
     <button v-on:click="startDeviceScanner">デバイスを探す</button>
@@ -29,8 +29,7 @@ import { computed, ref } from "vue";
 
 const isAvailability = ref(true);
 const errorMessage = ref();
-
-const devices = ref<BluetoothDevice[]>([]);
+const name = ref('')
 
 const displayConnectedDevices = () => {
   // nearbyDevices.forEach((device) => {
@@ -59,18 +58,31 @@ const startDeviceScanner = async () => {
   // https://developer.mozilla.org/ja/docs/Web/API/Bluetooth/getDevices#%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%83%BC%E3%81%AE%E4%BA%92%E6%8F%9B%E6%80%A7
   // const devices = await navigator.bluetooth.getDevices();
   // console.log(devices);
+  // From version 85: this feature is behind the #enable-experimental-web-platform-features preference (needs to be set to enabled). To change preferences in Chrome, visit chrome://flags.
+  // navigator.bluetooth.onadvertisementreceived = (
+  //   e: BluetoothAdvertisingEvent
+  // ) => {
+  //   console.log(e.rssi);
+  // };
 
-  navigator.bluetooth
-    .requestDevice({
-      acceptAllDevices: true,
-    })
-    .then((device) => {
-      devices.value.push(device);
-    })
-    .catch((error: Error) => {
-      errorMessage.value = error.message;
-    })
-    .finally(() => {});
+  // Bluetoothデバイスをリクエストする
+  navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+  // name.value = device.name ?? ''
+  // const service = await device.gatt?.connect()
+  // const preServices = await service?.getPrimaryService('00000d00-0000-1000-8000-00805f9b34fb') //0000181A-0000-1000-8000-00805F9B34FB
+  // console.log('service:', service, 'preService: ', preServices)
+
+  // navigator.bluetooth
+  //   .requestDevice({
+  //     acceptAllDevices: true,
+  //   })
+  //   .then((device) => {
+  //     devices.value.push(device);
+  //   })
+  //   .catch((error: Error) => {
+  //     errorMessage.value = error.message;
+  //   })
+  //   .finally(() => {});
 };
 </script>
 
