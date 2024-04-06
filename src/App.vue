@@ -25,11 +25,11 @@
         <li>受信信号の強さの降順で表示中</li>
       </ul>
     </div>
-    <div style="text-align: center;">
-      <table style="border-collapse: collapse; width: 100%;">
+    <div style="text-align: center">
+      <table style="border-collapse: collapse; width: 100%; overflow: scroll;">
         <thead>
           <th style="font-size: 13px">
-            デバイス名<br>（不明の場合はデバイスID）
+            デバイス名<br />（不明の場合はデバイスID）
           </th>
           <th style="font-size: 13px">受信信号の強さ</th>
         </thead>
@@ -46,6 +46,7 @@
   </div>
 
   <div
+    v-else
     style="
       position: absolute;
       top: 50%;
