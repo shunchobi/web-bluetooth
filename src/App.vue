@@ -29,12 +29,15 @@
       <table style="border-collapse: collapse; width: 100%; overflow: scroll">
         <thead>
           <th style="font-size: 13px">
-            デバイス名<br>（不明の場合はデバイスID）
+            デバイス名<br />（不明の場合はデバイスID）
           </th>
           <th style="font-size: 13px">受信信号の強さ</th>
         </thead>
         <tbody>
-          <template v-for="device in sortAdvDevices" :key="device.deviceName">
+          <template
+            v-for="device in [...sortAdvDevices, ...sortAdvDevices]"
+            :key="device.deviceName"
+          >
             <tr>
               <td>{{ device.deviceName }}</td>
               <td>{{ device.rssi }}</td>
@@ -93,6 +96,9 @@ const checkAvailability = async () => {
 };
 
 const test = () => {
+  // navigator.bluetooth.requestDevice({
+  //   acceptAllDevices: true,
+  // })
   navigator.bluetooth
     .requestLEScan({
       // filters: [{ namePrefix: "ThermoBeacon" }],
@@ -111,7 +117,7 @@ const test = () => {
       );
     })
     .catch((e) => {
-      errorMessage.value = e;
+      errorMessage.value = `${typeof e}, ${e}`;
     });
 };
 
