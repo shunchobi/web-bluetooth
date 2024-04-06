@@ -16,26 +16,43 @@
     </template>
   </div> -->
 
-  <div v-if="Object.keys(advDevices).length > 0" style="padding: 10px">
-    <p>※受信信号の強さが大きいほどデバイスからの距離が近いです</p>
-    <p>※受信信号の強さの降順で表示中</p>
-    <table>
-      <thead>
-        <th>デバイス名（デバイス名が不明の場合はデバイスID）</th>
-        <th>受信信号の強さ</th>
-      </thead>
-      <tbody>
-        <template v-for="device in sortAdvDevices" :key="device.deviceName">
-          <tr>
-            <td>{{ device.deviceName }}</td>
-            <td>{{ device.rssi }}</td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+  <div v-if="sortAdvDevices.length > 0" style="padding: 10px">
+    <div style="width: 100%; font-size: 13px">
+      <ul style="padding-left: 15px">
+        <li>
+          受信信号の強さが大きいほどデバイスからの距離が近いと予測できますが目安です。（アドバタイジングデータからデバイス間の正確な距離を取得することができません）
+        </li>
+        <li>受信信号の強さの降順で表示中</li>
+      </ul>
+    </div>
+    <div style="text-align: center;">
+      <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <th style="font-size: 13px">
+            デバイス名<br />（不明の場合はデバイスID）
+          </th>
+          <th style="font-size: 13px">受信信号の強さ</th>
+        </thead>
+        <tbody>
+          <template v-for="device in sortAdvDevices" :key="device.deviceName">
+            <tr>
+              <td>{{ device.deviceName }}</td>
+              <td>{{ device.rssi }}</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div>
+  <div
+    style="
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+  >
     <button v-on:click="test">デバイスを探す</button>
   </div>
 </template>
@@ -60,7 +77,7 @@ const sortAdvDevices = computed(() => {
     });
   }
 
-  return _.sortBy(sortArr, "rssi");
+  return _.orderBy(sortArr, ["rssi"], ["desc"]);
 });
 
 const devices = ref<BluetoothDevice[]>([]);
@@ -87,14 +104,12 @@ const test = () => {
         (e: BluetoothAdvertisingEvent) => {
           // log.value = e.rssi?.toString() ?? "rssi is undefined";
           const deviceName = e.device.name ?? e.device.id;
-          advDevices[deviceName] = e.rssi?.toString() ?? "no rssi";
-          console.log("advertisementreceived: ", e);
+          advDevices[deviceName] = e.rssi?.toString() ?? "";
         }
       );
     })
     .catch((e) => {
       errorMessage.value = e;
-      console.log("error catched", e);
     });
 };
 
@@ -231,17 +246,17 @@ const startDeviceScanner = async () => {
 
 <style>
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  /* margin: 0; */
+  /* display: flex; */
+  /* place-items: center; */
+  /* min-width: 320px;
+  min-height: 100vh; */
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* max-width: 1280px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem; */
+  /* text-align: center; */
 }
 </style>
