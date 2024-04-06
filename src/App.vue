@@ -28,9 +28,7 @@
     <div style="text-align: center">
       <table style="border-collapse: collapse; width: 100%; overflow: scroll">
         <thead>
-          <th style="font-size: 13px">
-            デバイス名（不明の場合はデバイスID）
-          </th>
+          <th style="font-size: 13px">デバイス名（不明の場合はデバイスID）</th>
           <th style="font-size: 13px">受信信号の強さ</th>
         </thead>
         <tbody>
@@ -96,9 +94,6 @@ const checkAvailability = async () => {
 };
 
 const test = () => {
-  // navigator.bluetooth.requestDevice({
-  //   acceptAllDevices: true,
-  // })
   navigator.bluetooth
     .requestLEScan({
       // filters: [{ namePrefix: "ThermoBeacon" }],
@@ -117,7 +112,14 @@ const test = () => {
       );
     })
     .catch((e) => {
-      errorMessage.value = `${typeof e}, ${e}`;
+      if ((e as string).includes("NotAllowed")) {
+        errorMessage.value = 'exec navigator.bluetooth.requestDevice'
+        navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+        });
+      } else {
+        errorMessage.value = e
+      }
     });
 };
 
