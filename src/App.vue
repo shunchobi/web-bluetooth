@@ -56,7 +56,6 @@
     "
   >
     <button v-on:click="test">デバイスを探す</button>
-    <button v-on:click="request">許可する</button>
   </div>
 </template>
 
@@ -110,7 +109,6 @@ const test = () => {
         "advertisementreceived",
         (e: BluetoothAdvertisingEvent) => {
           if (!e.rssi) return;
-          // log.value = e.rssi?.toString() ?? "rssi is undefined";
           const deviceName = e.device.name ?? e.device.id;
           advDevices[deviceName] = e.rssi;
         }
@@ -118,11 +116,7 @@ const test = () => {
     })
     .catch((e) => {
       if (e instanceof DOMException && e.name === "NotAllowedError") {
-        // ユーザーがアクセスを拒否した場合、再度アクセスの許可を求める
-        if (confirm("Bluetoothスキャンのアクセスを許可しますか？")) {
-          // ユーザーが許可した場合、再度アクセスを試行する
-          test();
-        } else {}
+        errorMessage.value = e;
       } else {
         errorMessage.value = e;
       }
