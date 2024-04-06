@@ -17,10 +17,23 @@
     </template>
   </div>
 
-  <div style="padding: 10px">
-    <template v-for="(deviceName, rssi) in advDevices" :key="deviceName">
-      {{ deviceName }}: {{ rssi }}
-    </template>
+  <div v-if="Object.keys(advDevices).length > 0" style="padding: 10px">
+    <p>※受信信号の強さが大きいほどデバイスからの距離が近いです</p>
+    <p>※受信信号の強さの降順で表示中</p>
+    <table>
+      <thead>
+        <th>デバイス名（デバイス名が不明の場合はデバイスID）</th>
+        <th>受信信号の強さ</th>
+      </thead>
+      <tbody>
+        <template v-for="device in sortAdvDevices" :key="device.deviceName">
+          <tr>
+            <td>{{ device.deviceName }}</td>
+            <td>{{ device.rssi }}</td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
   </div>
 
   <div>
@@ -31,12 +44,26 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
+import _ from "lodash";
 // import "./style.css";
 
 const isAvailability = ref(true);
 const errorMessage = ref();
 const log = ref("");
+
 const advDevices = reactive<{ [name: string]: string }>({});
+const sortAdvDevices = computed(() => {
+  const sortArr = [];
+  for (const deviceName in advDevices) {
+    const rssi = advDevices[deviceName];
+    sortArr.push({
+      deviceName,
+      rssi,
+    });
+  }
+
+  return _.sortBy(sortArr, 'rssi');
+});
 
 const devices = ref<BluetoothDevice[]>([]);
 
@@ -98,7 +125,7 @@ const startDeviceScanner = async () => {
   /**
     参考資料
     https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-rssi
-  
+
   */
 
   // https://github.com/circuitpython/web-editor/issues/40
