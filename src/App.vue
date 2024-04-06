@@ -33,7 +33,7 @@
         </thead>
         <tbody>
           <template
-            v-for="device in [...sortAdvDevices, ...sortAdvDevices]"
+            v-for="device in sortAdvDevices"
             :key="device.deviceName"
           >
             <tr>
@@ -56,6 +56,7 @@
     "
   >
     <button v-on:click="test">デバイスを探す</button>
+    <a href="chrome://flags/#enable-experimental-web-platform-features" target="_blank">許可</a>
   </div>
 </template>
 
