@@ -1,12 +1,13 @@
 <template>
-  <p v-if="sortAdvDevices.length == 0">「chrome://flags/#enable-experimental-web-platform-features」このリンクを開き、
+  <p v-if="sortAdvDevices.length == 0">
+    「chrome://flags/#enable-experimental-web-platform-features」このリンクを開き、
     #enable-experimental-web-platform-featuresをEnableにしてください。
     BELスキャンはまだ試験的な機能なため特別な許可設定が必要です。
   </p>
   <div v-if="errorMessage">
     <p style="color: red">{{ errorMessage }}</p>
   </div>
-  <div v-if="!isAvailability" style="line-height: 10px">
+  <div v-if="!isAvailability" style="line-height: 10px; color: red">
     <p>web bluetoothを使用できない環境です</p>
     <p>デバイスまたはブラウザを変更してください</p>
   </div>
@@ -36,10 +37,7 @@
           <th style="font-size: 13px">受信信号の強さ</th>
         </thead>
         <tbody>
-          <template
-            v-for="device in sortAdvDevices"
-            :key="device.deviceName"
-          >
+          <template v-for="device in sortAdvDevices" :key="device.deviceName">
             <tr>
               <td>{{ device.deviceName }}</td>
               <td>{{ device.rssi }}</td>
@@ -69,7 +67,7 @@ import _ from "lodash";
 // import "./style.css";
 
 const isAvailability = ref(true);
-const errorMessage = ref<string|undefined>();
+const errorMessage = ref<string | undefined>();
 const log = ref("");
 
 const advDevices = reactive<{ [name: string]: number }>({});
