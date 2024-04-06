@@ -95,8 +95,8 @@ const checkAvailability = async () => {
 };
 
 const request = async () => {
-  navigator.bluetooth.requestDevice({acceptAllDevices: true})
-}
+  navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+};
 
 const test = () => {
   navigator.bluetooth
@@ -117,7 +117,15 @@ const test = () => {
       );
     })
     .catch((e) => {
-      errorMessage.value = e;
+      if (e instanceof DOMException && e.name === "NotAllowedError") {
+        // ユーザーがアクセスを拒否した場合、再度アクセスの許可を求める
+        if (confirm("Bluetoothスキャンのアクセスを許可しますか？")) {
+          // ユーザーが許可した場合、再度アクセスを試行する
+          test();
+        } else {}
+      } else {
+        errorMessage.value = e;
+      }
     });
 };
 
