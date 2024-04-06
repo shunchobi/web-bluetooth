@@ -17,6 +17,10 @@
     </template>
   </div>
 
+  <div style="padding: 10px;">
+    <p>log: {{ log }}</p>
+  </div>
+
   <div>
     <button v-on:click="test">デバイスを探す</button>
     <!-- <button v-on:click="displayConnectedDevices">確認</button> -->
@@ -29,6 +33,7 @@ import { computed, onMounted, ref } from "vue";
 
 const isAvailability = ref(true);
 const errorMessage = ref();
+const log = ref('')
 
 const devices = ref<BluetoothDevice[]>([]);
 
@@ -51,11 +56,13 @@ const test = () => {
     .then((scan) => {
       navigator.bluetooth.addEventListener(
         "advertisementreceived",
-        (e: Event) => {
+        (e: BluetoothAdvertisingEvent) => {
+          log.value = e.rssi?.toString() ?? 'rssi is undefined'
           console.log("advertisementreceived: ", e);
         }
       );
     }).catch((e) => {
+      errorMessage.value = e
       console.log('error catched', e)
     });
 };
