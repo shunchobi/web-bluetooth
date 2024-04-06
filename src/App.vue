@@ -26,7 +26,7 @@
       </ul>
     </div>
     <div style="text-align: center">
-      <table style="border-collapse: collapse; width: 100%; overflow: scroll;">
+      <table style="border-collapse: collapse; width: 100%; overflow: scroll">
         <thead>
           <th style="font-size: 13px">
             デバイス名<br />（不明の場合はデバイスID）
@@ -67,7 +67,7 @@ const isAvailability = ref(true);
 const errorMessage = ref();
 const log = ref("");
 
-const advDevices = reactive<{ [name: string]: string }>({});
+const advDevices = reactive<{ [name: string]: number }>({});
 const sortAdvDevices = computed(() => {
   const sortArr = [];
   for (const deviceName in advDevices) {
@@ -103,9 +103,10 @@ const test = () => {
       navigator.bluetooth.addEventListener(
         "advertisementreceived",
         (e: BluetoothAdvertisingEvent) => {
+          if (!e.rssi) return;
           // log.value = e.rssi?.toString() ?? "rssi is undefined";
           const deviceName = e.device.name ?? e.device.id;
-          advDevices[deviceName] = e.rssi?.toString() ?? "";
+          advDevices[deviceName] = e.rssi;
         }
       );
     })
