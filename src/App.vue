@@ -17,8 +17,10 @@
     </template>
   </div>
 
-  <div style="padding: 10px;">
-    <p>log: {{ log }}</p>
+  <div style="padding: 10px">
+    <template v-for="(deviceName, rssi) in advDevices" :key="deviceName">
+      {{ deviceName }}: {{ rssi }}
+    </template>
   </div>
 
   <div>
@@ -28,12 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 // import "./style.css";
 
 const isAvailability = ref(true);
 const errorMessage = ref();
-const log = ref('')
+const log = ref("");
+const advDevices = reactive<{ [name: string]: string }>({});
 
 const devices = ref<BluetoothDevice[]>([]);
 
@@ -49,21 +52,24 @@ const checkAvailability = async () => {
 const test = () => {
   navigator.bluetooth
     .requestLEScan({
-      filters: [{ namePrefix: "ThermoBeacon" }],
-      // acceptAllAdvertisements: true,
+      // filters: [{ namePrefix: "ThermoBeacon" }],
+      acceptAllAdvertisements: true,
       keepRepeatedDevices: true,
     })
     .then((scan) => {
       navigator.bluetooth.addEventListener(
         "advertisementreceived",
         (e: BluetoothAdvertisingEvent) => {
-          log.value = e.rssi?.toString() ?? 'rssi is undefined'
+          // log.value = e.rssi?.toString() ?? "rssi is undefined";
+          const deviceName = e.device.name ?? e.device.id;
+          advDevices[deviceName] = e.rssi?.toString() ?? "no rssi";
           console.log("advertisementreceived: ", e);
         }
       );
-    }).catch((e) => {
-      errorMessage.value = e
-      console.log('error catched', e)
+    })
+    .catch((e) => {
+      errorMessage.value = e;
+      console.log("error catched", e);
     });
 };
 
