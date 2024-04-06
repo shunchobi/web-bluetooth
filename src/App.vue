@@ -1,21 +1,20 @@
 <template>
   <div v-if="errorMessage">
-    <span style="color: red">{{ errorMessage }}</span
-    ><br />
+    <p style="color: red">{{ errorMessage }}</p>
   </div>
-  <div v-if="!isAvailability">
-    <span>web bluetoothを使用できない環境です</span><br />
-    <span>デバイスまたはブラウザを変更してください</span>
+  <div v-if="!isAvailability" style="line-height: 10px">
+    <p>web bluetoothを使用できない環境です</p>
+    <p>デバイスまたはブラウザを変更してください</p>
   </div>
 
-  <div>
+  <!-- <div>
     <span v-if="devices.length > 0" style="text-decoration: underline"
       >接続済みデバイス名</span
     >
     <template v-for="(device, i) in devices" :key="i">
       <p>{{ device.name }}</p>
     </template>
-  </div>
+  </div> -->
 
   <div v-if="Object.keys(advDevices).length > 0" style="padding: 10px">
     <p>※受信信号の強さが大きいほどデバイスからの距離が近いです</p>
@@ -38,7 +37,6 @@
 
   <div>
     <button v-on:click="test">デバイスを探す</button>
-    <!-- <button v-on:click="displayConnectedDevices">確認</button> -->
   </div>
 </template>
 
@@ -62,7 +60,7 @@ const sortAdvDevices = computed(() => {
     });
   }
 
-  return _.sortBy(sortArr, 'rssi');
+  return _.sortBy(sortArr, "rssi");
 });
 
 const devices = ref<BluetoothDevice[]>([]);
