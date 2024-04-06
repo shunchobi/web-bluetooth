@@ -1,4 +1,8 @@
 <template>
+  <p v-if="sortAdvDevices.length == 0">「chrome://flags/#enable-experimental-web-platform-features」このリンクを開き、
+    #enable-experimental-web-platform-featuresをEnableにしてください。
+    BELスキャンはまだ試験的な機能なため特別な許可設定が必要です。
+  </p>
   <div v-if="errorMessage">
     <p style="color: red">{{ errorMessage }}</p>
   </div>
@@ -56,7 +60,6 @@
     "
   >
     <button v-on:click="test">デバイスを探す</button>
-    <a href="chrome://flags/#enable-experimental-web-platform-features" target="_blank">許可</a>
   </div>
 </template>
 
@@ -66,7 +69,7 @@ import _ from "lodash";
 // import "./style.css";
 
 const isAvailability = ref(true);
-const errorMessage = ref();
+const errorMessage = ref<string|undefined>();
 const log = ref("");
 
 const advDevices = reactive<{ [name: string]: number }>({});
@@ -117,7 +120,7 @@ const test = () => {
     })
     .catch((e) => {
       if (e instanceof DOMException && e.name === "NotAllowedError") {
-        errorMessage.value = e;
+        errorMessage.value = e.message;
       } else {
         errorMessage.value = e;
       }
