@@ -56,6 +56,7 @@
     "
   >
     <button v-on:click="test">デバイスを探す</button>
+    <button v-on:click="request">許可する</button>
   </div>
 </template>
 
@@ -93,6 +94,10 @@ const checkAvailability = async () => {
   isAvailability.value = await navigator.bluetooth.getAvailability();
 };
 
+const request = async () => {
+  navigator.bluetooth.requestDevice({acceptAllDevices: true})
+}
+
 const test = () => {
   navigator.bluetooth
     .requestLEScan({
@@ -112,14 +117,7 @@ const test = () => {
       );
     })
     .catch((e) => {
-      if ((e as string).includes("NotAllowed")) {
-        errorMessage.value = 'exec navigator.bluetooth.requestDevice'
-        navigator.bluetooth.requestDevice({
-          acceptAllDevices: true,
-        });
-      } else {
-        errorMessage.value = e
-      }
+      errorMessage.value = e;
     });
 };
 
