@@ -18,13 +18,13 @@
   </div>
 
   <div>
-    <button v-on:click="startDeviceScanner">デバイスを探す</button>
+    <button v-on:click="test">デバイスを探す</button>
     <!-- <button v-on:click="displayConnectedDevices">確認</button> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 // import "./style.css";
 
 const isAvailability = ref(true);
@@ -32,13 +32,56 @@ const errorMessage = ref();
 
 const devices = ref<BluetoothDevice[]>([]);
 
-const startDeviceScanner = async () => {
+onMounted(async () => {
+  await checkAvailability();
+});
+
+const checkAvailability = async () => {
   errorMessage.value = undefined;
   isAvailability.value = await navigator.bluetooth.getAvailability();
-  if (!isAvailability.value) {
-    return;
-  }
+};
 
+const test = () => {
+  navigator.bluetooth
+    .requestLEScan({
+      filters: [{ namePrefix: "ThermoBeacon" }],
+      // acceptAllAdvertisements: true,
+      keepRepeatedDevices: true,
+    })
+    .then((scan) => {
+      navigator.bluetooth.addEventListener(
+        "advertisementreceived",
+        (e: Event) => {
+          console.log("advertisementreceived: ", e);
+        }
+      );
+    }).catch((e) => {
+      console.log('error catched', e)
+    });
+};
+
+const scan = async () => {
+  navigator.bluetooth
+    .requestLEScan({
+      acceptAllAdvertisements: true,
+      keepRepeatedDevices: true,
+    })
+    .then((scanner) => {
+      console.log(scanner.active);
+
+      navigator.bluetooth.addEventListener("advertisementreceived", (event) => {
+        /* Display device data */
+        console.log(event.device.name);
+        console.log(event.rssi);
+        console.log(event.serviceData);
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+const startDeviceScanner = async () => {
   /**
     参考資料
     https://webbluetoothcg.github.io/web-bluetooth/#dom-bluetoothadvertisingevent-rssi
@@ -51,7 +94,12 @@ const startDeviceScanner = async () => {
   // https://developer.mozilla.org/ja/docs/Web/API/Bluetooth/getDevices#%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%83%BC%E3%81%AE%E4%BA%92%E6%8F%9B%E6%80%A7
   // const devices = await navigator.bluetooth.getDevices();
   // console.log(devices);
-  // From version 85: this feature is behind the #enable-experimental-web-platform-features preference (needs to be set to enabled). To change preferences in Chrome, visit chrome://flags.
+  // From version 85: this feature is behind the
+
+  // #enable-experimental-web-platform-features
+  // Use the new permissions backend for Web Bluetooth
+
+  // preference (needs to be set to enabled). To change preferences in Chrome, visit chrome://flags.
   // navigator.bluetooth.onadvertisementreceived = (
   //   e: BluetoothAdvertisingEvent
   // ) => {
@@ -61,13 +109,68 @@ const startDeviceScanner = async () => {
   // Bluetoothデバイスをリクエストする
   const device = await navigator.bluetooth.requestDevice({
     acceptAllDevices: true,
+    /**
+      温度
+      0000181a-0000-1000-8000-00805f9b34fb
+
+      湿度
+      0000181b-0000-1000-8000-00805F9B34FB
+
+      device_information
+      0000180a-0000-1000-8000-00805f9b34fb
+    */
+    optionalServices: ["0000180a-0000-1000-8000-00805f9b34fb"],
   });
   device.addEventListener(
     "advertisementreceived",
     (e: BluetoothAdvertisingEvent) => {
-      console.log("advertisementreceived", e);
+      console.log("advertisementreceived", e.rssi);
     }
   );
+  const server = await device.gatt?.connect();
+  const services = await server?.getPrimaryServices();
+
+  services?.forEach((service) => {
+    // 温度
+    // キャラクタリスティックのUUID: 00002a23-0000-1000-8000-00805f9b34fb value:  185
+    // キャラクタリスティックのUUID: 00002a24-0000-1000-8000-00805f9b34fb value:  77
+    // キャラクタリスティックのUUID: 00002a26-0000-1000-8000-00805f9b34fb value:  70
+    // キャラクタリスティックのUUID: 00002a27-0000-1000-8000-00805f9b34fb value:  72
+    // キャラクタリスティックのUUID: 00002a28-0000-1000-8000-00805f9b34fb value:  83
+    // キャラクタリスティックのUUID: 00002a29-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a2a-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a50-0000-1000-8000-00805f9b34fb
+
+    // 湿度
+    // キャラクタリスティックのUUID: 00002a23-0000-1000-8000-00805f9b34fb value:  185
+    // キャラクタリスティックのUUID: 00002a24-0000-1000-8000-00805f9b34fb value:  77
+    // キャラクタリスティックのUUID: 00002a26-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a27-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a28-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a29-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a2a-0000-1000-8000-00805f9b34fb
+    // キャラクタリスティックのUUID: 00002a50-0000-1000-8000-00805f9b34fb
+    service
+      ?.getCharacteristic("00002a24-0000-1000-8000-00805f9b34fb")
+      .then((chara) => {
+        // chara!.oncharacteristicvaluechanged = (e: Event) => {
+        //   console.log("oncharacteristicvaluechanged", e);
+        // };
+        return chara?.readValue();
+      })
+      .then((value) => {
+        console.log("service uuid", service.uuid);
+        console.log("value: ", value?.getUint8(0));
+      });
+  });
+
+  navigator.bluetooth.addEventListener("advertisementreceived", (event) => {
+    /* Display device data */
+    console.log(event.device.name);
+    console.log(event.rssi);
+    console.log(event.serviceData);
+  });
+
   devices.value.push(device);
   // name.value = device.name ?? ''
   // const service = await device.gatt?.connect()
