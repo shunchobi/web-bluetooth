@@ -12,15 +12,6 @@
     <p>デバイスまたはブラウザを変更してください</p>
   </div>
 
-  <!-- <div>
-    <span v-if="devices.length > 0" style="text-decoration: underline"
-      >接続済みデバイス名</span
-    >
-    <template v-for="(device, i) in devices" :key="i">
-      <p>{{ device.name }}</p>
-    </template>
-  </div> -->
-
   <div v-if="sortAdvDevices.length > 0" style="padding: 10px">
     <div style="width: 100%; font-size: 13px">
       <ul style="padding-left: 15px">
@@ -55,9 +46,24 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      text-align: center;
     "
   >
-    <button v-on:click="test">デバイスを探す</button>
+    <div
+      v-if="device"
+      style="margin-bottom: 30px;"
+    >
+      <span style="text-decoration: underline"
+        >ペアリング済みデバイス名: {{ device.name }}</span
+      >
+    </div>
+    <button
+      v-on:click="request"
+      style="margin-right: 10px; margin-bottom: 10px"
+    >
+      ペアリングする
+    </button>
+    <button v-on:click="scan" style="margin-bottom: 10px">スキャンする</button>
   </div>
 </template>
 
@@ -84,7 +90,7 @@ const sortAdvDevices = computed(() => {
   return _.orderBy(sortArr, ["rssi"], ["desc"]);
 });
 
-const devices = ref<BluetoothDevice[]>([]);
+const device = ref<BluetoothDevice | undefined>();
 
 onMounted(async () => {
   await checkAvailability();
@@ -95,16 +101,26 @@ const checkAvailability = async () => {
   isAvailability.value = await navigator.bluetooth.getAvailability();
 };
 
-const request = async () => {
-  navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+const request = () => {
+  navigator.bluetooth
+    .requestDevice({
+      acceptAllDevices: true,
+    })
+    .then((d) => {
+      device.value = d;
+    })
+    .catch((e) => {
+      errorMessage.value = e;
+    });
 };
 
-const test = () => {
+const scan = () => {
   navigator.bluetooth
     .requestLEScan({
       // filters: [{ namePrefix: "ThermoBeacon" }],
       acceptAllAdvertisements: true,
       keepRepeatedDevices: true,
+      // listenOnlyGrantedDevices: true
     })
     .then((scan) => {
       navigator.bluetooth.addEventListener(
@@ -122,27 +138,6 @@ const test = () => {
       } else {
         errorMessage.value = e;
       }
-    });
-};
-
-const scan = async () => {
-  navigator.bluetooth
-    .requestLEScan({
-      acceptAllAdvertisements: true,
-      keepRepeatedDevices: true,
-    })
-    .then((scanner) => {
-      console.log(scanner.active);
-
-      navigator.bluetooth.addEventListener("advertisementreceived", (event) => {
-        /* Display device data */
-        console.log(event.device.name);
-        console.log(event.rssi);
-        console.log(event.serviceData);
-      });
-    })
-    .catch((error) => {
-      console.log(error);
     });
 };
 
@@ -236,7 +231,7 @@ const startDeviceScanner = async () => {
     console.log(event.serviceData);
   });
 
-  devices.value.push(device);
+  // devices.value.push(device);
   // name.value = device.name ?? ''
   // const service = await device.gatt?.connect()
   // const preServices = await service?.getPrimaryService('00000d00-0000-1000-8000-00805f9b34fb') //0000181A-0000-1000-8000-00805F9B34FB
